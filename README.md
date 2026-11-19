@@ -15,14 +15,23 @@ it would break the competition's 4,096-byte per-file and 8,192-byte tree
 caps; the submission bundle carries it beside the transcripts).
 
 The engine: 0x88 board, full legal move generation (castling, en passant,
-promotions), negamax alpha-beta with a transposition table, killer moves,
-MVV-LVA ordering and a captures/promotions quiescence search, iterative
-deepening under a fixed 20,000-node budget — never a clock, so replays
-play the same moves. Evaluation is material plus the bishop pair and
-procedural piece-square terms (pawn advance, centrality, rook on the
-seventh, king shelter / endgame centrality). It plays every game of the
-gauntlet through the env at `MAKEFUN_ENV_URL` in UCI.
+all four promotions), negamax alpha-beta with a transposition table, killer
+moves, MVV-LVA ordering, null-move pruning (R=2) and late-move reductions,
+a captures/promotions quiescence search that also plays every reply to a
+check (and scores checkmate there), iterative deepening under a fixed
+20,000-node budget — never a clock, so replays play the same moves.
+Evaluation is material plus the bishop pair, tempo, passed-pawn and rook
+open/semi-open-file bonuses and procedural piece-square terms (pawn advance,
+centrality, rook on the seventh, king shelter / endgame centrality). It plays
+every game of the gauntlet through the env at `MAKEFUN_ENV_URL` in UCI.
 
 Local checks: perft(3) from the start position = 8,902 and Kiwipete
-perft(2) = 2,039 (both exact); a 60-ply self-play game completed with
-every move legal; mate-in-1 found.
+perft(2) = 2,039 (both exact), and all six canonical perft positions match
+python-chess exactly (including positions with underpromotions and en
+passant); a 60-ply self-play game completed with every move legal;
+mate-in-1 found. Strength check: two 20-game matches against the previous
+version at the same 20,000-node budget, 10 openings each with colours
+reversed, scored +9 =3 −8 and +11 =1 −8 — 22/40 points in total (55%,
+about +35 Elo), with no illegal move or crash in 40 games; single-process
+move time averaged 1.19 s (max 1.94 s over 24 sampled mid-game positions),
+well inside the 10 s move limit.
